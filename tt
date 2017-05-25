@@ -1,90 +1,138 @@
 package May10;
-
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 import javax.swing.Timer;
 
-public class TypingTutor extends JFrame implements ActionListener {
+public class Game {
 
-	JLabel lblWord;
+	public static void main(String[] args) {
+		Tutor tt=new Tutor("Deeney's former club Walsall are due a cut of any fee while the player is one year into a new five year contract.Deeney is understood to be concerned at how his season finished under Walter Mazzarri and, though the Italian coach is being repla");
+	}
+
+public class Tutor extends JFrame implements ActionListener {
 	JLabel lblTimer;
-	JTextArea txtWord;
-	JLabel Score;
+	JLabel lblScore;
+	JLabel lblWord;
+	JTextArea lblText;
 	JButton btnStart;
 	JButton btnStop;
-	int timeLeft=50;
-	boolean isRunning=false;
-	int score=0;
+	
+	boolean isRunning;
+	int score;
+	int timeLeft;
 	Timer timer;
+	String[] data;
 
-	public TypingTutor() {
-		setTitle("Typing Tutor");
+	public Tutor(String feeder) {
+		data = feeder.split(" ");
+		super.setSize(1000, 1000);
+		super.setTitle("Typing Tutor");
 		GridLayout layout = new GridLayout(3, 2);
 		super.setLayout(layout);
-		Font font = new Font("Comic Sans MS", 1, 100);
+		lblTimer = new JLabel("");
+		addComponent(lblTimer);
+		lblScore = new JLabel("");
+		addComponent(lblScore);
 		lblWord = new JLabel("");
-		lblWord.setFont(font);
-		super.add(lblWord);
-		lblTimer = new JLabel("Timer:");
-		lblTimer.setFont(font);
-		super.add(lblTimer);
-		txtWord = new JTextArea();
-		txtWord.setFont(font);
-		super.add(txtWord);
-		Score = new JLabel("Score:");
-		Score.setFont(font);
-		super.add(Score);
-		btnStart = new JButton("Start");
-		btnStart.setFont(font);
+		addComponent(lblWord);
+		lblText = new JTextArea();
+		addComponent(lblText);
+		btnStart = new JButton("");
 		btnStart.addActionListener(this);
-		super.add(btnStart);
-		btnStop = new JButton("Stop");
-		btnStop.setFont(font);
+		addComponent(btnStart);
+		btnStop = new JButton("");
+		addComponent(btnStop);
+		btnStop.addActionListener(this);
+		super.setVisible(true);
+		initGame();
+	}
+
+	public void addComponent(JComponent comp) {
+		Font font = new Font("Comic Sans MS", 1, 100);
+		comp.setFont(font);
+		super.add(comp);
+
+	}
+
+	private void initGame() {
+		score = 0;
+		timeLeft = 50;
+		isRunning=false;
+		timer = new Timer(3000, this);
 		btnStop.setEnabled(false);
-		super.add(btnStop);
-		timer =new Timer(1000, this);
-		
-		setSize(1000, 1000);
-		setVisible(true);
+		lblTimer.setText("Timer:" + timeLeft);
+		lblScore.setText("Score:" + score);
+		lblText.setText("");
+		lblWord.setText("");
+		btnStart.setText("Start");
+		btnStop.setText("Stop");
+
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-	if(e.getSource()==btnStart){
-		if(isRunning==false){
-			btnStart.setText("Pause");
-			btnStop.setEnabled(true);
-			lblTimer.setText("Time:"+timeLeft);
-			
-			Score.setText("Score:"+score);
-			timer.start();
-			isRunning=true;
+		if (e.getSource() == btnStart) {
+			handleStart();
+		} else if (e.getSource() == btnStop) {
+			handleStop();
+		} else if (e.getSource() == timer) {
+			handletimer();
 		}
-		else{
-			
-			btnStart.setText("Resume");
-			isRunning=false;
-			timer.stop();
-			
-		}
-	}
-		else if(e.getSource()==btnStop){
-			timer.stop();
-			btnStart.setText("Start");
-		}
-		else if(e.getSource()==timer){
-			timeLeft--;
-			lblTimer.setText("Time:"+timeLeft);
-		}
-		
 	}
 
+	private void handleStart() {
+		if(isRunning){
+			timer.stop();
+			btnStart.setText("Start");
+			isRunning=false;
+		}
+		else{
+			timer.start();
+			isRunning=true;
+			btnStart.setText("Pause");
+			btnStop.setEnabled(true);
+		}
+	}
+
+	private void handleStop() {
+		timer.stop();
+		int j=JOptionPane.showConfirmDialog(this, "Do you want to restart");
+		if(j==JOptionPane.YES_OPTION){
+		initGame();	
+		}
+		else{
+			super.dispose();
+		}
+	}
+
+	private void handletimer(){
+		if(timeLeft>0){
+			int index=(int)(Math.random()*data.length-1);
+			timeLeft--;
+			lblTimer.setText("Timer:"+timeLeft);
+			String e=lblWord.getText();
+			String input=lblText.getText();
+			if(input.equals(e)){
+				score++;
+				lblScore.setText("Score:"+score);
+			}
+			String expected=data[index];
+			lblWord.setText(expected);
+			lblText.setText("");
+			lblText.setFocusable(true);
+			
+		}
+		else{
+			handleStop();
+		}
+	}
 }
